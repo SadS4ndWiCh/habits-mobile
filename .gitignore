@@ -3,6 +3,7 @@ node_modules/
 dist/
 npm-debug.*
 yarn.lock
+*.log
 *.jks
 *.p8
 *.p12
