@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ScrollView, View, Text, TextInput, TouchableOpacity } from "react-native"
+import { ScrollView, View, Text, TextInput, TouchableOpacity, Alert } from "react-native"
 import { Feather } from "@expo/vector-icons";
 import colors from "tailwindcss/colors";
 
 import { BackButton } from "../components/BackButton"
 import { CheckBox } from "../components/CheckBox";
+import { api } from "../libs/axios";
 
 const availableWeekDays = [
 	'Domingo',
@@ -17,6 +18,7 @@ const availableWeekDays = [
 ]
 
 export const New = () => {
+	const [title, setTitle] = useState('');
 	const [weekDays, setWeekDays] = useState<number[]>([]);
 
 	const handleToggleWeekDay = (weekDayIndex: number) => {
@@ -24,6 +26,24 @@ export const New = () => {
 			setWeekDays(prev => prev.filter(weekDay => weekDay !== weekDayIndex));
 		} else {
 			setWeekDays(prev => [...prev, weekDayIndex]);
+		}
+	}
+
+	const handleCreateNewHabit = async () => {
+		try {
+			if (!title.trim() || weekDays.length === 0) {
+				Alert.alert('Novo hábito', 'Informe o nome do hábito e escolha a recorrência.')
+			}
+
+			await api.post('/habits', { title, weekDays });
+
+			setTitle('');
+			setWeekDays([]);
+
+			Alert.alert('Novo hábito', 'Hábito criado com sucesso!');
+		} catch (err) {
+			console.error(err);
+			Alert.alert('Ops...', 'Não foi possível criar o novo hábito.');
 		}
 	}
 
@@ -49,6 +69,8 @@ export const New = () => {
 					placeholder="ex. Exercitar, beber água, estudar, etc..."
 					placeholderTextColor={colors.zinc[400]}
 					cursorColor={colors.white}
+					value={title}
+					onChangeText={setTitle}
 				/>
 
 				<Text className="mt-6 text-white font-semibold text-base">
@@ -68,6 +90,7 @@ export const New = () => {
 
 				<TouchableOpacity
 					activeOpacity={0.7}
+					onPress={handleCreateNewHabit}
 					className="w-full h-14 flex-row items-center justify-center bg-green-600 rounded-md mt-6"
 				>
 					<Feather
